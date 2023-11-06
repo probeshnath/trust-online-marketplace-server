@@ -3,12 +3,14 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const cors = require('cors')
 require('dotenv').config()
+// const bodyParser = require('body-parser');
 const port = process.env.PORT || 5000;
 
 
 // middlewarw 
 app.use(cors())
 app.use(express.json())
+// app.use(bodyParser())
 
 
 const uri = process.env.MONGODB_URL;
@@ -40,8 +42,13 @@ async function run() {
 
     // get all jobs
     app.get("/jobs", async(req,res)=>{
-        const result = await jobs.find().toArray();
-        console.log(result)
+        let query  = {};
+        // console.log(query)
+        if(req.query?.email){
+            query = { email : req.query.email}
+        }
+        const result = await jobs.find(query).toArray();
+        // console.log(result)
         res.send(result)
     })
 
