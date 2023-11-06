@@ -27,8 +27,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    // database collection
     const jobs = client.db("trust").collection("jobs")
 
+    // create jobs
     app.post("/jobs", async(req,res)=>{
        const job = req.body;
        const result = await jobs.insertOne(job)
@@ -36,6 +38,12 @@ async function run() {
        res.send(result)
     })
 
+    // get all jobs
+    app.get("/jobs", async(req,res)=>{
+        const result = await jobs.find().toArray();
+        console.log(result)
+        res.send(result)
+    })
 
 
 
