@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const cors = require('cors')
 require('dotenv').config()
@@ -52,6 +52,37 @@ async function run() {
         res.send(result)
     })
 
+    // get single job by id
+    app.get("/jobs/:id", async(req,res)=>{
+        const id = req.params.id;
+        const query = {_id : new ObjectId(id)}
+        const result = await jobs.findOne(query)
+        console.log(result)
+        res.send(result)
+    } )
+
+    // update single job
+    app.put("/jobs/:id", async(req,res)=>{
+        const id = req.params.id;
+        const job = req.body;
+        // console.log("id",id)
+        // console.log("job", job)
+        const filter = {_id: new ObjectId(id)}
+        const options = {updsert:true}
+        const updatedJob = {
+            $set:{
+                j_title:job.j_title ,
+                deadline:job.deadline,
+                description:job.description,
+                category:job.category,
+                min_price:job.min_price,
+                max_price:job.max_price
+            }
+        }
+
+        const result = await jobs.updateOne(filter,updatedJob,options)
+        res.send(result)
+    })
 
 
 
