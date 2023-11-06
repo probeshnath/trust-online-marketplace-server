@@ -44,8 +44,8 @@ async function run() {
     app.get("/jobs", async(req,res)=>{
         let query  = {};
         // console.log(query)
-        if(req.query?.email){
-            query = { email : req.query.email}
+        if(req.query?.email || req.query?.category){
+            query = { email : req.query.email || req.query.category}
         }
         const result = await jobs.find(query).toArray();
         // console.log(result)
@@ -90,6 +90,22 @@ async function run() {
         const query = {_id: new ObjectId(id)}
         const result = await jobs.deleteOne(query)
         res.send(result)
+    })
+
+    // jobs fetch by category
+    // app.get("/jobs",)
+
+    // this is project bit parts
+    const bids = client.db("trust").collection("bids")
+
+    // create all bids
+    app.post("/bids", async(req,res)=>{
+        const bid = req.body;
+        // console.log(bid)
+        const result = await bids.insertOne(bid)
+        console.log(result)
+        res.send(result)
+
     })
 
 
