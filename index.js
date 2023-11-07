@@ -29,6 +29,25 @@ const client = new MongoClient(uri, {
 });
 
 
+// verify token 
+
+const verifyToken = (req,res,next) =>{
+    const token = req?.cookies?.token;
+    // console.log("tt token",token)
+    if(!token){
+        return res.status(401).send({message:"Unauthorized access request"})
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN,(err,decoded)=>{
+        if(err){
+            return res.status(401).send({message:"Unauthorized access request"})
+        }
+        req.user = decoded;
+        next()
+    })
+}
+
+
 
 
 
@@ -67,6 +86,8 @@ async function run() {
     // create jobs
     app.post("/jobs", async(req,res)=>{
        const job = req.body;
+       console.log(job)
+
        const result = await jobs.insertOne(job)
        console.log(result)
        res.send(result)
@@ -76,9 +97,17 @@ async function run() {
     app.get("/jobs", async(req,res)=>{
         let query  = {};
         // console.log(query)
-        if(req.query?.email || req.query?.category){
-            query = { email : req.query.email || req.query.category}
+        if(req.query?.email){
+            query = { email : req.query.email }
         }
+
+        //  verify user
+    //    if(req.query.email){
+    //     if(req.user.email !== req.query?.email){
+    //         return res.status(403).send({message:"Forbidden access"})
+    //     }
+    //    }
+
         const result = await jobs.find(query).toArray();
         // console.log(result)
         res.send(result)
@@ -141,18 +170,31 @@ async function run() {
     })
 
     // user bids jobs
-    app.get("/bids",async(req,res)=>{
+    app.get("/bids",verifyToken, async(req,res)=>{
         const user_Email = req.query.email;
         // console.log(user_Email)
+
+        // verify
+        if(req.user.email !== req.query.email){
+            return res.status(403).send({message:"Forbidden access"})
+        }
+
         const query = {seller_email : user_Email}
         const result = await bids.find(query).toArray();
         res.send(result)
     })
 
     // my jobs , which user or seller bid Request
-    app.get("/bidrequests",async(req,res)=>{
+    app.get("/bidrequests",verifyToken,async(req,res)=>{
         const user_Email = req.query.email;
-        // console.log(user_Email)
+        // console.log("user email",user_Email)
+        // console.log("token email",req.user)
+
+        if(req.user.email !== req.query.email){
+            return res.status(403).send({message:"Forbidden access"})
+        }
+
+
         const query = {buyer_email : user_Email}
         const result = await bids.find(query).toArray();
         res.send(result)
