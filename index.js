@@ -108,15 +108,44 @@ async function run() {
 
     })
 
+    // user bids jobs
     app.get("/bids",async(req,res)=>{
         const user_Email = req.query.email;
         // console.log(user_Email)
         const query = {seller_email : user_Email}
         const result = await bids.find(query).toArray();
         res.send(result)
-
-
     })
+
+    // my jobs , which user or seller bid Request
+    app.get("/bidrequests",async(req,res)=>{
+        const user_Email = req.query.email;
+        // console.log(user_Email)
+        const query = {buyer_email : user_Email}
+        const result = await bids.find(query).toArray();
+        res.send(result)
+    })
+
+
+    //  update bid request
+    app.put("/bid/update/:id", async(req,res) =>{
+        const id = req.params.id;
+        const query = req.body;
+        console.log("id:::",id)
+        console.log("status",query.job_Status)
+
+        const newId = {_id: new ObjectId(id)}
+        const options = {updsert:true}
+        const updatedBid = {
+            $set:{
+               job_Status: query.job_Status
+            }
+        }
+
+        const result = await bids.updateOne(newId,updatedBid,options)
+        res.send(result)
+    })
+
 
 
 
