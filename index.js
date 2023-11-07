@@ -3,14 +3,18 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const cors = require('cors')
 require('dotenv').config()
-// const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
 const port = process.env.PORT || 5000;
 
 
 // middlewarw 
-app.use(cors())
+app.use(cors({
+   origin: ["http://localhost:5173","http://localhost:5174"],
+    credentials: true
+}))
 app.use(express.json())
-// app.use(bodyParser())
+app.use(cookieParser())
 
 
 const uri = process.env.MONGODB_URL;
@@ -24,6 +28,11 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -31,6 +40,29 @@ async function run() {
 
     // database collection
     const jobs = client.db("trust").collection("jobs")
+
+
+    // token generate --->>>
+    app.post("/jwt", async(req,res)=>{
+        const user = req.body;
+        // console.log(user)
+        const token = jwt.sign(user, process.env.ACCESS_TOKEN,{expiresIn:"1h"})
+        // console.log(token)
+        // res.send(token)
+        res.cookie("token", token,{
+            httpOnly:true,
+            secure:true,
+            sameSite:"none"
+        }).send({success:true})
+    })
+
+    // remove token
+    app.post("/logout", async(req,res)=>{
+        res.clearCookie("token",{
+            maxAge: 0
+        }).send({success:true})
+    })
+
 
     // create jobs
     app.post("/jobs", async(req,res)=>{
@@ -131,14 +163,15 @@ async function run() {
     app.put("/bid/update/:id", async(req,res) =>{
         const id = req.params.id;
         const query = req.body;
-        console.log("id:::",id)
-        console.log("status",query.job_Status)
+        // console.log("id:::",id)
+        // console.log("status",query.job_Status)
 
         const newId = {_id: new ObjectId(id)}
         const options = {updsert:true}
         const updatedBid = {
             $set:{
-               job_Status: query.job_Status
+               job_Status: query.job_Status,
+               job_progress: query.job_progress,
             }
         }
 
