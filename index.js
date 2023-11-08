@@ -185,7 +185,7 @@ async function run() {
         }
 
         const query = {seller_email : user_Email}
-        const result = await bids.find(query).toArray();
+        const result = await bids.find(query).sort({job_Status: 1}).toArray();
         res.send(result)
     })
 
