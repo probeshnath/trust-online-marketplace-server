@@ -1,8 +1,8 @@
+require('dotenv').config()
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const cors = require('cors')
-require('dotenv').config()
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser')
 const port = process.env.PORT || 5000;
@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 
 // middlewarw 
 app.use(cors({
-   origin: ["http://localhost:5173","http://localhost:5174"],
+   origin: ["https://trust-mern-marketplace.web.app","https://trust-mern-marketplace.firebaseapp.com"],
     credentials: true
 }))
 app.use(express.json())
@@ -55,7 +55,7 @@ const verifyToken = (req,res,next) =>{
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // database collection
     const jobs = client.db("trust").collection("jobs")
@@ -69,16 +69,18 @@ async function run() {
         // console.log(token)
         // res.send(token)
         res.cookie("token", token,{
-            httpOnly:true,
-            secure:true,
-            sameSite:"none"
+            httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', 
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         }).send({success:true})
     })
 
     // remove token
     app.post("/logout", async(req,res)=>{
         res.clearCookie("token",{
-            maxAge: 0
+            maxAge: 0,
+            sameSite:'none',
+            secure:true
         }).send({success:true})
     })
 
