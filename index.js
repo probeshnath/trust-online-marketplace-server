@@ -99,10 +99,15 @@ async function run() {
     // get all jobs
     app.get("/jobs", async(req,res)=>{
         let query  = {};
-        // console.log(query)
-        if(req.query?.email){
-            
+        // let query_cate = {};
+
+        if(req.query?.email){            
             query = { email : req.query.email }
+            // query_cate = { category : req.query?.category }
+        }
+        if(req?.query?.category){
+            console.log("query_cate",req.query?.category)
+            query = { category : req.query?.category }
         }
 
 
