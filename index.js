@@ -84,9 +84,12 @@ async function run() {
 
 
     // create jobs
-    app.post("/jobs", async(req,res)=>{
+    app.post("/jobs",verifyToken, async(req,res)=>{
        const job = req.body;
        console.log(job)
+       if(req.user.email !== job?.email){
+        return res.status(403).send({message:"Forbidden access"})
+    }
 
        const result = await jobs.insertOne(job)
        console.log(result)
@@ -98,15 +101,10 @@ async function run() {
         let query  = {};
         // console.log(query)
         if(req.query?.email){
+            
             query = { email : req.query.email }
         }
 
-        //  verify user
-    //    if(req.query.email){
-    //     if(req.user.email !== req.query?.email){
-    //         return res.status(403).send({message:"Forbidden access"})
-    //     }
-    //    }
 
         const result = await jobs.find(query).toArray();
         // console.log(result)
@@ -118,7 +116,9 @@ async function run() {
         const id = req.params.id;
         const query = {_id : new ObjectId(id)}
         const result = await jobs.findOne(query)
-        console.log(result)
+
+
+        console.log("resut ----",result)
         res.send(result)
     } )
 
