@@ -158,8 +158,7 @@ async function run() {
         res.send(result)
     })
 
-    // jobs fetch by category
-    // app.get("/jobs",)
+  
 
     // this is project bit parts
     const bids = client.db("trust").collection("bids")
