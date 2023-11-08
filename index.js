@@ -100,6 +100,9 @@ async function run() {
     app.get("/jobs", async(req,res)=>{
         let query  = {};
         // let query_cate = {};
+        // const page = parseInt(req.query.page)
+        // const size = parseInt(req.query.size)
+        // console.log("page", page,"size",size)
 
         if(req.query?.email){            
             query = { email : req.query.email }
@@ -111,8 +114,9 @@ async function run() {
         }
 
 
-        const result = await jobs.find(query).toArray();
-        // console.log(result)
+        const result = await jobs.find(query)
+        // .skip(page * size).limit(size)
+        .toArray();
         res.send(result)
     })
 
